@@ -1,5 +1,7 @@
 import random
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+from aiogram.types import Message
 
 # ⚠️ ЗАМЕНИТЕ ЭТОТ ТОКЕН НА СВОЙ ОТ @BotFather!
 API_TOKEN = 8293141398:AAGxHUnKZH21bqkiISmIv5rGVrfop1uwMMQ
@@ -14,22 +16,22 @@ TAROT_CARDS = [
 
 # Создаём бота и диспетчер
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
-# Память: кто уже получил бесплатный расклад (в реальном проекте — используйте базу данных)
+# Память: кто уже получил бесплатный расклад
 used_users = set()
 
 # Команда /start
-@dp.message_handler(commands=['start'])
-async def send_welcome(message: types.Message):
-    await message.reply(
+@dp.message(Command("start"))
+async def send_welcome(message: Message):
+    await message.answer(
         "🔮 Привет! Я — маг Таро.\n\n"
         "Первый расклад — бесплатно! Напиши /tarot, чтобы начать."
     )
 
 # Команда /tarot — делает расклад
-@dp.message_handler(commands=['tarot'])
-async def do_tarot(message: types.Message):
+@dp.message(Command("tarot"))
+async def do_tarot(message: Message):
     user_id = message.from_user.id
 
     if user_id not in used_users:
@@ -49,8 +51,8 @@ async def do_tarot(message: types.Message):
         )
 
 # Команда /pay — инструкция по оплате
-@dp.message_handler(commands=['pay'])
-async def send_payment_info(message: types.Message):
+@dp.message(Command("pay"))
+async def send_payment_info(message: Message):
     await message.answer(
         "💳 Оплати 150 ₽ здесь:\nhttps://example.com/pay\n\n"
         "После оплаты напиши @Andrei_Ad_min — я включу полный доступ!"
@@ -59,4 +61,4 @@ async def send_payment_info(message: types.Message):
 # Запуск бота
 if __name__ == '__main__':
     print("✅ Бот запущен и готов к работе!")
-    executor.start_polling(dp, skip_updates=True)
+    dp.run_polling(bot)
